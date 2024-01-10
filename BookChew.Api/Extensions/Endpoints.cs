@@ -1,7 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Service.Contracts;
-using Shared.Dtos;
+using Shared.Dtos.Auth;
+using Shared.Dtos.User;
 
 namespace BookChew.Api.Extensions;
 
@@ -13,13 +14,20 @@ public static class Endpoints
         {
             var token = serviceManager.AuthService.AuthAsync(authRequest);
             return Results.Ok(token);
-        });
+        }).WithTags("Auth");
     }
 
-    public static void Other(this WebApplication app)
+    public static void RestaurantsEndpoints(this WebApplication app)
     {
-        app.MapGet("api/weathers", [Authorize] () => "OK")
-            .WithName("GetWeatherForecast")
-            .WithOpenApi();
+        
+    }
+    
+    public static void UsersEndpoints(this WebApplication app)
+    {
+        app.MapPost("/api/user", async (IServiceManager serviceManager, [FromBody] AddUserDto addUserDto) =>
+        {
+            await serviceManager.UserService.AddUserAsync(addUserDto);
+            return Results.Ok();
+        }).WithTags("User");
     }
 }

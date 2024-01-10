@@ -4,9 +4,9 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Service.Contracts;
 using Shared.Config;
-using Shared.Dtos;
+using Shared.Dtos.Auth;
 
-namespace Service;
+namespace Service.Services;
 
 public class AuthService(IOptions<JwtSettings> jwtSettings) : IAuthService
 {

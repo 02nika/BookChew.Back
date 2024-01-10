@@ -1,7 +1,11 @@
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Repository;
+using Repository.Context;
+using Repository.Contracts;
 using Service;
 using Service.Contracts;
 using Shared.Config;
@@ -24,6 +28,9 @@ public static class ServiceExtensions
     public static void ConfigureServiceManager(this IServiceCollection services) =>
         services.AddScoped<IServiceManager, ServiceManager>();
 
+    public static void ConfigureRepositoryManager(this IServiceCollection services) =>
+        services.AddScoped<IRepositoryManager, RepositoryManager>();
+    
     public static void ConfigureJwtAuthentication(this IServiceCollection services, JwtSettings jwt)
     {
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -73,4 +80,8 @@ public static class ServiceExtensions
             });
         });
     }
+    
+    public static void ConfigureSqlContext(this IServiceCollection services, IConfiguration configuration) =>
+        services.AddDbContext<AppDbContext>(o =>
+            o.UseSqlServer(configuration.GetConnectionString("db") ?? string.Empty));   
 }

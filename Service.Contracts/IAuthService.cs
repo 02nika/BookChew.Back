@@ -1,4 +1,5 @@
 using Shared.Dtos;
+using Shared.Dtos.Auth;
 
 namespace Service.Contracts;
 
