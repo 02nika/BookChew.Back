@@ -30,7 +30,7 @@ public static class ServiceExtensions
 
     public static void ConfigureRepositoryManager(this IServiceCollection services) =>
         services.AddScoped<IRepositoryManager, RepositoryManager>();
-    
+
     public static void ConfigureJwtAuthentication(this IServiceCollection services, JwtSettings jwt)
     {
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

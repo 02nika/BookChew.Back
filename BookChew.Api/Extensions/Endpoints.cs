@@ -24,9 +24,15 @@ public static class Endpoints
     
     public static void UsersEndpoints(this WebApplication app)
     {
-        app.MapPost("/api/user", async (IServiceManager serviceManager, [FromBody] AddUserDto addUserDto) =>
+        app.MapPost("/api/user", [Authorize] async (IServiceManager serviceManager, [FromBody] AddUserDto addUserDto) =>
         {
             await serviceManager.UserService.AddUserAsync(addUserDto);
+            return Results.Ok();
+        }).WithTags("User");
+        
+        app.MapPost("/api/user/fill", async (IServiceManager serviceManager) =>
+        {
+            await serviceManager.UserService.FillUsersAsync();
             return Results.Ok();
         }).WithTags("User");
     }

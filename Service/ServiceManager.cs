@@ -1,4 +1,5 @@
 using AutoMapper;
+using Entities.Models;
 using Microsoft.Extensions.Options;
 using Repository.Contracts;
 using Service.Contracts;
@@ -13,7 +14,7 @@ public class ServiceManager: IServiceManager
     private readonly Lazy<IUserService> _userService;
     private readonly Lazy<IRestaurantService> _restaurantService;
     
-    public ServiceManager(IOptions<JwtSettings> jwtSettings, IMapper mapper, IRepositoryManager repositoryManager)
+    public ServiceManager(IRepositoryManager repositoryManager, IOptions<JwtSettings> jwtSettings, IMapper mapper)
     {
         _authService = new Lazy<IAuthService>(() => new AuthService(jwtSettings));
         _userService = new Lazy<IUserService>(() => new UserService(repositoryManager, mapper));
