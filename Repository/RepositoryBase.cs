@@ -6,9 +6,9 @@ namespace Repository;
 
 public class RepositoryBase<T> : IRepositoryBase<T> where T : class
 {
-    protected RepositoryBase(DbContext dbContext)
+    protected RepositoryBase(DbContext db)
     {
-        DbSet = dbContext.Set<T>();
+        DbSet = db.Set<T>();
     }
 
     private DbSet<T> DbSet { get; }

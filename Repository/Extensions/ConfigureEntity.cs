@@ -19,9 +19,19 @@ public static class ConfigureEntity
             .Property(p => p.LastName)
             .IsRequired()
             .HasMaxLength(100);
+        
+        modelBuilder.Entity<User>()
+            .Property(p => p.UserName)
+            .IsRequired()
+            .HasMaxLength(100);
 
         modelBuilder.Entity<User>()
             .Property(p => p.PersonalNumber)
             .HasMaxLength(20);
+        
+        modelBuilder.Entity<User>()
+            .HasMany(u => u.Passwords)
+            .WithOne(o => o.User)
+            .HasForeignKey(o => o.UserId);
     }
 }

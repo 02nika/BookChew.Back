@@ -44,7 +44,6 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.AuthEndpoints();
 app.UsersEndpoints();
 app.RestaurantsEndpoints();
 

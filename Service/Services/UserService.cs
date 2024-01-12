@@ -1,6 +1,4 @@
 using AutoMapper;
-using Bogus;
-using Bogus.Extensions.Denmark;
 using Entities.Models;
 using Repository.Contracts;
 using Service.Contracts;
@@ -13,20 +11,16 @@ public class UserService(IRepositoryManager repositoryManager, IMapper mapper) :
     public async Task AddUserAsync(AddUserDto userDto)
     {
         var user = mapper.Map<User>(userDto);
-
+        var password = mapper.Map<UserPassword>(userDto);
+        
+        user.Passwords.Add(password);
+        
         await repositoryManager.UserRepository.AddUserAsync(user);
         await repositoryManager.SaveAsync();
     }
 
-    public async Task FillUsersAsync()
+    public async Task<bool> UserExistsAsync(LoginUserDto userDto)
     {
-        var userFaker = new Faker<User>()
-            .RuleFor(u => u.FirstName, f => f.Person.FirstName)
-            .RuleFor(u => u.LastName, f => f.Person.LastName)
-            .RuleFor(u => u.PersonalNumber, f => f.Person.Cpr());
-        var users = userFaker.Generate(40);
-
-        await repositoryManager.UserRepository.AddUsersAsync(users);
-        await repositoryManager.SaveAsync();
+        return await repositoryManager.UserRepository.UserExistsAsync(userDto);
     }
 }

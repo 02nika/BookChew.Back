@@ -18,7 +18,7 @@ public class ServiceManager: IServiceManager
     {
         _authService = new Lazy<IAuthService>(() => new AuthService(jwtSettings));
         _userService = new Lazy<IUserService>(() => new UserService(repositoryManager, mapper));
-        _restaurantService = new Lazy<IRestaurantService>(() => new RestaurantService(repositoryManager, mapper));
+        _restaurantService = new Lazy<IRestaurantService>(() => new RestaurantService(repositoryManager));
     }
 
     public IAuthService AuthService => _authService.Value;

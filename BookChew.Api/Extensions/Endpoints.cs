@@ -1,39 +1,39 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Service.Contracts;
-using Shared.Dtos.Auth;
 using Shared.Dtos.User;
 
 namespace BookChew.Api.Extensions;
 
 public static class Endpoints
 {
-    public static void AuthEndpoints(this WebApplication app)
-    {
-        app.MapPost("/api/auth", (IServiceManager serviceManager, [FromBody] AuthRequest authRequest) =>
-        {
-            var token = serviceManager.AuthService.AuthAsync(authRequest);
-            return Results.Ok(token);
-        }).WithTags("Auth");
-    }
-
     public static void RestaurantsEndpoints(this WebApplication app)
     {
-        
+        const string tag = "Restaurant";
+
+        app.MapGet("/api/restaurants",[Authorize(Roles = "Admin")] (IServiceManager serviceManager) => Task.FromResult(Results.Ok()))
+            .WithTags(tag);
     }
     
     public static void UsersEndpoints(this WebApplication app)
     {
-        app.MapPost("/api/user", [Authorize] async (IServiceManager serviceManager, [FromBody] AddUserDto addUserDto) =>
-        {
-            await serviceManager.UserService.AddUserAsync(addUserDto);
-            return Results.Ok();
-        }).WithTags("User");
+        const string tag = "User";
         
-        app.MapPost("/api/user/fill", async (IServiceManager serviceManager) =>
+        app.MapPost("/api/user/register", async (IServiceManager serviceManager, [FromBody] AddUserDto addUserDto) =>
         {
-            await serviceManager.UserService.FillUsersAsync();
-            return Results.Ok();
-        }).WithTags("User");
+            // await serviceManager.UserService.AddUserAsync(addUserDto);
+            var token = serviceManager.AuthService.AuthAsync();
+
+            return Results.Ok(token);
+        }).WithTags(tag);
+        
+        app.MapPost("/api/user/login", async (IServiceManager serviceManager, [FromBody] LoginUserDto userDto) =>
+        {
+            var exists = await serviceManager.UserService.UserExistsAsync(userDto);
+            if (!exists) return Results.NotFound();
+            
+            var token = serviceManager.AuthService.AuthAsync();
+            return Results.Ok(token);
+        }).WithTags(tag);
     }
 }

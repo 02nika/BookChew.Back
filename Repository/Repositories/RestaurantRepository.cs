@@ -4,4 +4,4 @@ using Repository.Contracts;
 
 namespace Repository.Repositories;
 
-public class RestaurantRepository(AppDbContext appDbContext) : RepositoryBase<Restaurant>(appDbContext), IRestaurantRepository;
+public class RestaurantRepository(AppDbContext appDb) : RepositoryBase<Restaurant>(appDb), IRestaurantRepository;
