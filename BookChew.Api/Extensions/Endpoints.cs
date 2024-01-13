@@ -1,3 +1,4 @@
+using BookChew.Api.Identity;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Service.Contracts;
@@ -12,6 +13,7 @@ public static class Endpoints
         const string tag = "Restaurant";
 
         app.MapGet("/api/restaurants", (HttpContext context, IServiceManager serviceManager) => Results.Ok())
+            .RequireAuthorization(PolicyData.AdminPolicyName)
             .WithTags(tag);
     }
 

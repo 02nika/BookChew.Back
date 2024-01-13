@@ -1,4 +1,5 @@
 using System.Text;
+using BookChew.Api.Identity;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -41,6 +42,8 @@ public static class ServiceExtensions
             })
             .AddJwtBearer(options =>
             {
+                options.RequireHttpsMetadata = false;
+                options.SaveToken = false;
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidIssuer = jwt.Issuer,
@@ -49,14 +52,19 @@ public static class ServiceExtensions
                     ValidateIssuer = true,
                     ValidateAudience = true,
                     ValidateLifetime = true,
-                    ValidateIssuerSigningKey = true
+                    ValidateIssuerSigningKey = true,
+                    ClockSkew = TimeSpan.Zero
                 };
             });
     }
 
     public static void ConfigureJwtAuthorization(this IServiceCollection services)
     {
-        services.AddAuthorization();
+        services.AddAuthorization(options =>
+        {
+            options.AddPolicy(PolicyData.AdminPolicyName, p => 
+                p.RequireClaim(PolicyData.AdminClaimName, "true"));
+        });
     }
     
     public static void AddCustomSwaggerGen(this IServiceCollection services)

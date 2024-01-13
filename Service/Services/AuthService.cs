@@ -22,7 +22,7 @@ public class AuthService(IOptions<JwtSettings> jwtSettings) : IAuthService
 
         var claims = new[]
         {
-            new Claim(ClaimTypes.Role, "Admin"),
+            new Claim("admin", "true"),
         };
 
         var tokenDescriptor = new SecurityTokenDescriptor
