@@ -11,27 +11,27 @@ public static class Endpoints
     {
         const string tag = "Restaurant";
 
-        app.MapGet("/api/restaurants",[Authorize(Roles = "Admin")] (IServiceManager serviceManager) => Task.FromResult(Results.Ok()))
+        app.MapGet("/api/restaurants", (HttpContext context, IServiceManager serviceManager) => Results.Ok())
             .WithTags(tag);
     }
-    
+
     public static void UsersEndpoints(this WebApplication app)
     {
         const string tag = "User";
-        
-        app.MapPost("/api/user/register", async (IServiceManager serviceManager, [FromBody] AddUserDto addUserDto) =>
+
+        app.MapPost("/api/user/register", [Authorize] async (IServiceManager serviceManager, [FromBody] AddUserDto addUserDto) =>
         {
-            // await serviceManager.UserService.AddUserAsync(addUserDto);
+            await serviceManager.UserService.AddUserAsync(addUserDto);
             var token = serviceManager.AuthService.AuthAsync();
 
             return Results.Ok(token);
         }).WithTags(tag);
-        
+
         app.MapPost("/api/user/login", async (IServiceManager serviceManager, [FromBody] LoginUserDto userDto) =>
         {
             var exists = await serviceManager.UserService.UserExistsAsync(userDto);
             if (!exists) return Results.NotFound();
-            
+
             var token = serviceManager.AuthService.AuthAsync();
             return Results.Ok(token);
         }).WithTags(tag);

@@ -33,23 +33,32 @@ public static class ServiceExtensions
 
     public static void ConfigureJwtAuthentication(this IServiceCollection services, JwtSettings jwt)
     {
-        services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+        services.AddAuthentication(x =>
+            {
+                x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                x.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
             .AddJwtBearer(options =>
             {
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
+                    ValidIssuer = jwt.Issuer,
+                    ValidAudience = jwt.Audience,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwt.Key)),
                     ValidateIssuer = true,
                     ValidateAudience = true,
                     ValidateLifetime = true,
-                    ValidateIssuerSigningKey = true,
-                    ValidIssuer = jwt.Issuer,
-                    ValidAudience = jwt.Issuer,
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwt.Key))
+                    ValidateIssuerSigningKey = true
                 };
             });
-
     }
 
+    public static void ConfigureJwtAuthorization(this IServiceCollection services)
+    {
+        services.AddAuthorization();
+    }
+    
     public static void AddCustomSwaggerGen(this IServiceCollection services)
     {
         services.AddSwaggerGen(options =>
@@ -60,10 +69,10 @@ public static class ServiceExtensions
                 Type = SecuritySchemeType.ApiKey,
                 Scheme = "Bearer",
                 BearerFormat = "Custom",
-                In = ParameterLocation.Header, 
+                In = ParameterLocation.Header,
                 Description = "Merchant Token"
             });
-    
+
             options.AddSecurityRequirement(new OpenApiSecurityRequirement
             {
                 {
@@ -80,8 +89,8 @@ public static class ServiceExtensions
             });
         });
     }
-    
+
     public static void ConfigureSqlContext(this IServiceCollection services, IConfiguration configuration) =>
         services.AddDbContext<AppDbContext>(o =>
-            o.UseSqlServer(configuration.GetConnectionString("db") ?? string.Empty));   
+            o.UseSqlServer(configuration.GetConnectionString("db") ?? string.Empty));
 }

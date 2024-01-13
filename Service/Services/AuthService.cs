@@ -11,22 +11,32 @@ namespace Service.Services;
 public class AuthService(IOptions<JwtSettings> jwtSettings) : IAuthService
 {
     private readonly JwtSettings _jwtSettings = jwtSettings.Value;
-
+    private static readonly TimeSpan TokenLifetime = TimeSpan.FromMinutes(1); 
+    
     public string AuthAsync()
     {
+        var tokenHandler = new JwtSecurityTokenHandler();
+
         var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Key));
         var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
-        var claims = new[] {
+        var claims = new[]
+        {
             new Claim(ClaimTypes.Role, "Admin"),
         };
-        
-        var token = new JwtSecurityToken(_jwtSettings.Issuer,
-            _jwtSettings.Issuer,
-            claims,
-            expires: DateTime.Now.AddMinutes(120),
-            signingCredentials: credentials);
 
-        return new JwtSecurityTokenHandler().WriteToken(token);
+        var tokenDescriptor = new SecurityTokenDescriptor
+        {
+            Subject = new ClaimsIdentity(claims),
+            Expires = DateTime.UtcNow.Add(TokenLifetime),
+            Issuer = _jwtSettings.Issuer,
+            Audience = _jwtSettings.Audience,
+            SigningCredentials = credentials
+        };
+
+        var token = tokenHandler.CreateToken(tokenDescriptor);
+
+        var jwt = tokenHandler.WriteToken(token);
+        return jwt;
     }
 }
