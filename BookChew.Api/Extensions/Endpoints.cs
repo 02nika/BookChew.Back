@@ -1,7 +1,7 @@
-using BookChew.Api.Identity;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Service.Contracts;
+using Shared.Dtos.Policies;
 using Shared.Dtos.User;
 
 namespace BookChew.Api.Extensions;
@@ -24,9 +24,9 @@ public static class Endpoints
         app.MapPost("/api/user/register", [Authorize] async (IServiceManager serviceManager, [FromBody] AddUserDto addUserDto) =>
         {
             await serviceManager.UserService.AddUserAsync(addUserDto);
-            var token = serviceManager.AuthService.AuthAsync();
+            var response = serviceManager.AuthService.Auth();
 
-            return Results.Ok(token);
+            return Results.Ok(response);
         }).WithTags(tag);
 
         app.MapPost("/api/user/login", async (IServiceManager serviceManager, [FromBody] LoginUserDto userDto) =>
@@ -34,8 +34,22 @@ public static class Endpoints
             var exists = await serviceManager.UserService.UserExistsAsync(userDto);
             if (!exists) return Results.NotFound();
 
-            var token = serviceManager.AuthService.AuthAsync();
-            return Results.Ok(token);
+            var response = serviceManager.AuthService.Auth();
+            return Results.Ok(response);
+        }).WithTags(tag);
+    }
+
+    public static void AuthEndpoints(this WebApplication app)
+    {
+        const string tag = "Auth";
+
+        app.MapPost("/api/auth/refresh", (HttpContext context, IServiceManager serviceManager) =>
+        {
+            var tokenHash = context.Request.Headers["refresh"];
+            serviceManager.AuthService.TokenIsValid(tokenHash.First()!);
+            
+            var response = serviceManager.AuthService.Auth();
+            return Results.Ok(response);
         }).WithTags(tag);
     }
 }

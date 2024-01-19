@@ -26,6 +26,7 @@ var app = builder.Build();
 
 app.Services.GetRequiredService<ILogger<Program>>();
 
+app.ConfigureExceptionHandler();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -48,5 +49,6 @@ app.UseAuthorization();
 
 app.UsersEndpoints();
 app.RestaurantsEndpoints();
+app.AuthEndpoints();
 
 app.Run();

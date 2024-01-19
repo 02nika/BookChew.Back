@@ -1,4 +1,4 @@
-namespace BookChew.Api.Identity;
+namespace Shared.Dtos.Policies;
 
 public class PolicyData
 {

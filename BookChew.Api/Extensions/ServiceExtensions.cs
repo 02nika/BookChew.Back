@@ -1,5 +1,4 @@
 using System.Text;
-using BookChew.Api.Identity;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -10,6 +9,7 @@ using Repository.Contracts;
 using Service;
 using Service.Contracts;
 using Shared.Config;
+using Shared.Dtos.Policies;
 
 namespace BookChew.Api.Extensions;
 
@@ -63,7 +63,7 @@ public static class ServiceExtensions
         services.AddAuthorization(options =>
         {
             options.AddPolicy(PolicyData.AdminPolicyName, p => 
-                p.RequireClaim(PolicyData.AdminClaimName, "true"));
+                p.RequireClaim(PolicyData.AdminClaimName, true.ToString()));
         });
     }
     
