@@ -9,7 +9,7 @@ using Repository.Contracts;
 using Service;
 using Service.Contracts;
 using Shared.Config;
-using Shared.Dtos.Policies;
+using Shared.Dto.Policies;
 
 namespace BookChew.Api.Extensions;
 

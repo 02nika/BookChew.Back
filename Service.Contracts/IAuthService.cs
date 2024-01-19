@@ -1,11 +1,13 @@
 using System.IdentityModel.Tokens.Jwt;
-using Shared.Dtos.Auth;
+using System.Security.Claims;
+using Shared.Dto.Auth;
 
 namespace Service.Contracts;
 
 public interface IAuthService
 {
-    AuthResponse Auth();
+    AuthResponse Auth(int userId);
     JwtSecurityToken? Decode(string tokenHash);
-    bool TokenIsValid(string tokenHash);
+    List<Claim> TokenClaims(string tokenHash);
+    int GetUserId(string tokenHash);
 }

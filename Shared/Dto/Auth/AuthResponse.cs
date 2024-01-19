@@ -1,4 +1,4 @@
-namespace Shared.Dtos.Auth;
+namespace Shared.Dto.Auth;
 
 public class AuthResponse
 {

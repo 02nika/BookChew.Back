@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace Shared.Dtos.User;
+namespace Shared.Dto.User;
 
 public class AddUserDto
 {

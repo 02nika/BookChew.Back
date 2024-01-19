@@ -6,23 +6,23 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Service.Contracts;
 using Shared.Config;
-using Shared.Dtos.Auth;
-using Shared.Dtos.Policies;
+using Shared.Dto.Auth;
+using Shared.Dto.Policies;
 
 namespace Service.Services;
 
 public class AuthService(IOptions<JwtSettings> jwtSettings) : IAuthService
 {
     private readonly JwtSettings _jwtSettings = jwtSettings.Value;
-    private static readonly TimeSpan TokenLifetime = TimeSpan.FromMinutes(1);
-    private static readonly TimeSpan RefreshLifetime = TokenLifetime.Add(TimeSpan.FromMinutes(1));
+    private static readonly TimeSpan TokenLifetime = TimeSpan.FromMinutes(10);
+    private static readonly TimeSpan RefreshLifetime = TokenLifetime.Add(TimeSpan.FromMinutes(10));
 
-    AuthResponse IAuthService.Auth()
+    public AuthResponse Auth(int userId)
     {
         var tokenHandler = new JwtSecurityTokenHandler();
 
-        var accessToken = tokenHandler.CreateToken(TokenDescriptor(TokenLifetime));
-        var refreshToken = tokenHandler.CreateToken(TokenDescriptor(RefreshLifetime));
+        var accessToken = tokenHandler.CreateToken(TokenDescriptor(TokenLifetime, userId));
+        var refreshToken = tokenHandler.CreateToken(TokenDescriptor(RefreshLifetime, userId));
 
         return new AuthResponse
         {
@@ -31,7 +31,7 @@ public class AuthService(IOptions<JwtSettings> jwtSettings) : IAuthService
         };
     }
 
-    private SecurityTokenDescriptor TokenDescriptor(TimeSpan expires)
+    private SecurityTokenDescriptor TokenDescriptor(TimeSpan expires, int userId)
     {
         var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Key));
         var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
@@ -39,6 +39,7 @@ public class AuthService(IOptions<JwtSettings> jwtSettings) : IAuthService
         var claims = new[]
         {
             new Claim(PolicyData.AdminClaimName, true.ToString()),
+            new Claim(PolicyData.UserIdClaimName, userId.ToString()),
         };
 
         return new SecurityTokenDescriptor
@@ -50,22 +51,22 @@ public class AuthService(IOptions<JwtSettings> jwtSettings) : IAuthService
             SigningCredentials = credentials
         };
     }
-    
+
     public JwtSecurityToken? Decode(string tokenHash)
     {
         var tokenHandler = new JwtSecurityTokenHandler();
-        
+
         return tokenHandler.ReadToken(tokenHash) as JwtSecurityToken;
     }
 
-    public bool TokenIsValid(string tokenHash)
+    public List<Claim> TokenClaims(string tokenHash)
     {
         var tokenHandler = new JwtSecurityTokenHandler();
         var key = Encoding.UTF8.GetBytes(_jwtSettings.Key);
 
         try
         {
-            tokenHandler.ValidateToken(tokenHash, new TokenValidationParameters
+            var principal = tokenHandler.ValidateToken(tokenHash, new TokenValidationParameters
             {
                 ValidateIssuer = true,
                 ValidateAudience = true,
@@ -75,11 +76,20 @@ public class AuthService(IOptions<JwtSettings> jwtSettings) : IAuthService
                 IssuerSigningKey = new SymmetricSecurityKey(key)
             }, out _);
 
-            return true;
+            return principal.Claims.ToList();
         }
         catch (Exception)
         {
             throw new TokenValidException();
         }
+    }
+
+    public int GetUserId(string tokenHash)
+    {
+        var tokenClaims = TokenClaims(tokenHash);
+
+        var userId = tokenClaims.First(c => c.Type == PolicyData.UserIdClaimName).Value;
+
+        return int.Parse(userId);
     }
 }

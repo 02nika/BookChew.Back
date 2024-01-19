@@ -12,4 +12,5 @@ public class User : BaseEntity
     public string PersonalNumber { get; set; }
 
     public List<UserPassword> Passwords { get; set; } = [];
+    public List<Restaurant> Restaurants { get; set; } = [];
 }

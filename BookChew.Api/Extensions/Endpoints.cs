@@ -1,8 +1,9 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Service.Contracts;
-using Shared.Dtos.Policies;
-using Shared.Dtos.User;
+using Shared.Dto.Policies;
+using Shared.Dto.Restaurant;
+using Shared.Dto.User;
 
 namespace BookChew.Api.Extensions;
 
@@ -12,7 +13,23 @@ public static class Endpoints
     {
         const string tag = "Restaurant";
 
-        app.MapGet("/api/restaurants", (HttpContext context, IServiceManager serviceManager) => Results.Ok())
+        app.MapGet("/api/restaurants",
+                [Authorize] async (HttpContext context, IServiceManager serviceManager) =>
+                    await serviceManager.RestaurantService.RestaurantsAsync())
+            .RequireAuthorization(PolicyData.AdminPolicyName)
+            .WithTags(tag);
+
+        app.MapPost("/api/restaurant",
+                [Authorize] async (HttpContext context, IServiceManager serviceManager,
+                    [FromBody] AddRestaurantDto restaurant) =>
+                {
+                    var tokenHash = context.Request.Headers["Authorization"];
+                    var userId = serviceManager.AuthService.GetUserId(tokenHash.First()!.Split(' ')[1]);
+                    
+                    await serviceManager.RestaurantService.AddRestaurantAsync(restaurant, userId);
+
+                    return Results.Ok();
+                })
             .RequireAuthorization(PolicyData.AdminPolicyName)
             .WithTags(tag);
     }
@@ -21,20 +38,19 @@ public static class Endpoints
     {
         const string tag = "User";
 
-        app.MapPost("/api/user/register", [Authorize] async (IServiceManager serviceManager, [FromBody] AddUserDto addUserDto) =>
-        {
-            await serviceManager.UserService.AddUserAsync(addUserDto);
-            var response = serviceManager.AuthService.Auth();
+        app.MapPost("/api/user/register", [Authorize]
+            async (IServiceManager serviceManager, [FromBody] AddUserDto addUserDto) =>
+            {
+                var user = await serviceManager.UserService.AddUserAsync(addUserDto);
+                var response = serviceManager.AuthService.Auth(user.Id);
 
-            return Results.Ok(response);
-        }).WithTags(tag);
+                return Results.Ok(response);
+            }).WithTags(tag);
 
         app.MapPost("/api/user/login", async (IServiceManager serviceManager, [FromBody] LoginUserDto userDto) =>
         {
-            var exists = await serviceManager.UserService.UserExistsAsync(userDto);
-            if (!exists) return Results.NotFound();
-
-            var response = serviceManager.AuthService.Auth();
+            var u = await serviceManager.UserService.GetUserAsync(userDto);
+            var response = serviceManager.AuthService.Auth(u.Id);
             return Results.Ok(response);
         }).WithTags(tag);
     }
@@ -46,9 +62,9 @@ public static class Endpoints
         app.MapPost("/api/auth/refresh", (HttpContext context, IServiceManager serviceManager) =>
         {
             var tokenHash = context.Request.Headers["refresh"];
-            serviceManager.AuthService.TokenIsValid(tokenHash.First()!);
-            
-            var response = serviceManager.AuthService.Auth();
+            var userId = serviceManager.AuthService.GetUserId(tokenHash.First()!);
+
+            var response = serviceManager.AuthService.Auth(userId);
             return Results.Ok(response);
         }).WithTags(tag);
     }

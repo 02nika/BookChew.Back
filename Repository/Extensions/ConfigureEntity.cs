@@ -33,5 +33,21 @@ public static class ConfigureEntity
             .HasMany(u => u.Passwords)
             .WithOne(o => o.User)
             .HasForeignKey(o => o.UserId);
+        
+        modelBuilder.Entity<User>()
+            .HasMany(u => u.Restaurants)
+            .WithOne(o => o.User)
+            .HasForeignKey(o => o.UserId);
+    }
+
+    public static void RestaurantConfig(this ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<Restaurant>()
+            .HasKey(p => p.Id);
+        
+        modelBuilder.Entity<Restaurant>()
+            .Property(p => p.Name)
+            .IsRequired()
+            .HasMaxLength(100);
     }
 }
