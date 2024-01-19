@@ -1,3 +1,4 @@
+using BookChew.Api.Extensions.Filter.Custom;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Service.Contracts;
@@ -38,14 +39,16 @@ public static class Endpoints
     {
         const string tag = "User";
 
-        app.MapPost("/api/user/register", [Authorize]
+        app.MapPost("/api/user/register",
             async (IServiceManager serviceManager, [FromBody] AddUserDto addUserDto) =>
             {
                 var user = await serviceManager.UserService.AddUserAsync(addUserDto);
                 var response = serviceManager.AuthService.Auth(user.Id);
 
                 return Results.Ok(response);
-            }).WithTags(tag);
+            })
+            .WithTags(tag)
+            .AddEndpointFilter<UserEndpointFilter>();
 
         app.MapPost("/api/user/login", async (IServiceManager serviceManager, [FromBody] LoginUserDto userDto) =>
         {
