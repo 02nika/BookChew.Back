@@ -1,6 +1,6 @@
 using Shared.Extensions;
 
-namespace BookChew.Api.Extensions.RateLimiting;
+namespace BookChew.Api.Extensions.MiddleWares;
 
 public class RateLimitingMiddleware(RequestDelegate next)
 {

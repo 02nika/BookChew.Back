@@ -1,4 +1,4 @@
-using BookChew.Api.Extensions.RateLimiting;
+using BookChew.Api.Extensions.MiddleWares;
 using Entities.ErrorModel;
 using Entities.Exceptions;
 using Microsoft.AspNetCore.Diagnostics;
@@ -40,5 +40,10 @@ public static class MiddlewareExtensions
     public static void ConfigureRateLimitingHandler(this WebApplication app)
     {
         app.UseMiddleware<RateLimitingMiddleware>();
+    }
+
+    public static void ConfigureAuditLogHandler(this WebApplication app)
+    {
+        app.UseMiddleware<AuditLogMiddleware>();
     }
 }

@@ -1,4 +1,4 @@
-using BookChew.Api.Extensions.Filter.Custom;
+using BookChew.Api.Extensions.MiddleWares;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Service.Contracts;
@@ -17,6 +17,7 @@ public static class Endpoints
         app.MapGet("/api/restaurants",
                 [Authorize] async (HttpContext context, IServiceManager serviceManager) =>
                     await serviceManager.RestaurantService.RestaurantsAsync())
+            .AddEndpointFilter<RestaurantsFilter>()
             .RequireAuthorization(PolicyData.AdminPolicyName)
             .WithTags(tag);
 
@@ -31,6 +32,7 @@ public static class Endpoints
 
                     return Results.Ok();
                 })
+            .AddEndpointFilter<RestaurantsFilter>()
             .RequireAuthorization(PolicyData.AdminPolicyName)
             .WithTags(tag);
     }
@@ -47,8 +49,7 @@ public static class Endpoints
 
                 return Results.Ok(response);
             })
-            .WithTags(tag)
-            .AddEndpointFilter<UserEndpointFilter>();
+            .WithTags(tag);
 
         app.MapPost("/api/user/login", async (IServiceManager serviceManager, [FromBody] LoginUserDto userDto) =>
         {

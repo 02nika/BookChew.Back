@@ -47,6 +47,7 @@ app.UseForwardedHeaders(new ForwardedHeadersOptions
 app.UseHttpsRedirection();
 
 app.UseAuthentication();
+app.ConfigureAuditLogHandler();
 app.UseAuthorization();
 
 app.UsersEndpoints();
