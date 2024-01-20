@@ -26,7 +26,9 @@ var app = builder.Build();
 
 app.Services.GetRequiredService<ILogger<Program>>();
 
+app.ConfigureRateLimitingHandler();
 app.ConfigureExceptionHandler();
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();

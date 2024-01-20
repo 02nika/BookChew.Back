@@ -1,10 +1,11 @@
+using BookChew.Api.Extensions.RateLimiting;
 using Entities.ErrorModel;
 using Entities.Exceptions;
 using Microsoft.AspNetCore.Diagnostics;
 
 namespace BookChew.Api.Extensions;
 
-public static class ExceptionMiddlewareExtensions
+public static class MiddlewareExtensions
 {
     public static void ConfigureExceptionHandler(this WebApplication app)
     {
@@ -34,5 +35,10 @@ public static class ExceptionMiddlewareExtensions
                 await context.Response.WriteAsync(errorDetail.ToString());
             });
         });
+    }
+
+    public static void ConfigureRateLimitingHandler(this WebApplication app)
+    {
+        app.UseMiddleware<RateLimitingMiddleware>();
     }
 }
